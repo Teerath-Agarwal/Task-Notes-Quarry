@@ -1,12 +1,14 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import connection from './database/config.js'
+// import connection from './database/config.js'
 import { signIn, signUp } from './authorisation/userAuth.js'
 
 const app = express()
 dotenv.config()
 app.use(cors())
+
+app.use(express.json());
 
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,9 +22,7 @@ app.get('/login', signIn)
 app.post('/signup', signUp)
 
 app.get('/', (req,res) => {
-    connection.connect()
     res.status(200).send('Backend running successfully')
-    connection.end()
 })
 
 app.listen(process.env.PORT || 3000, (err) => {

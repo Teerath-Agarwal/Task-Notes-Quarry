@@ -20,26 +20,17 @@ function authorise(req, res, next) {
 }
 
 function signIn(req, res){
-    connection.connect( (err) => {
-        if (err) {
-            console.log(`Error connecting to database: ${err}`);
-            res.status(406).send({
-                verdict: 'Error connecting to database'
-            });
-            return;
-        }
         const { email, password } = req.body;
-        connection.query(`SELECT id, password FROM Users WHERE email='${email};'`, (err, results) => {
-            connection.end()
-            if (err){
+        connection.query(`SELECT id, password FROM Users WHERE email='${email}';`, (err, results) => {
+            if (err || !results){
                 res.status(402).send({
-                    verdict: 'Email Id does not exist'
+                    verdict: 'Email Id does not exist',
+                    success: false,
                 });
                 return;
             }
-            console.log(`Results of db query: ${results}`);
-            const id = results[0];
-            const pwHash = results[1];
+            const id = results[0].id;
+            const pwHash = results[0].password;
             
             bcrypt.compare(password, pwHash, (err, result) => {
                 if (err) {
@@ -49,39 +40,34 @@ function signIn(req, res){
                 }
                 if ( result==false ){
                     res.status(403).send({
-                        verdict: 'Incorrect Password'
+                        verdict: 'Incorrect Password',
+                        success: false,
                     });
                     return;
                 }
-                const token = jwt.sign(id, process.env.JTW_PRIVATE_KEY, { expiresIn: "1h"});
+                const token = jwt.sign({id, email}, process.env.JWT_PRIVATE_KEY, { expiresIn: "1h"});
                 res.cookie("token", token, {
                     httpOnly: true,
                     secure: true
                 });
-                res.status(200).send('Sign in successful')
+                res.status(200).send({
+                    verdict: 'Sign in successful',
+                    success: true,
+                });
                 return;
             });
         });
-    });
 }
 
 function signUp(req, res) {
-    connection.connect( (err) => {
-        if (err) {
-            console.log(`Error connecting to database: ${err}`);
-            res.status(406).send({
-                verdict: 'Error connecting to database'
-            });
-            return;
-        }
         var { email, userName, password } = req.body;
         const saltRounds = 7;
         bcrypt.hash(password, saltRounds, (err, hash) => {
             if (err) {
-                connection.end();
                 console.log(`Error hashing the password: ${err}`);
                 res.status(406).send({
-                    verdict: 'Error hashing the password'
+                    verdict: 'Error hashing the password',
+                    success: false,
                 });
                 return;
             }
@@ -90,24 +76,24 @@ function signUp(req, res) {
                 VALUES (
                     '${email}',
                     '${hash}',
-                    '${userName}
-                );
-            `, (err, result) => {
-                connection.end();
+                    '${userName}'
+                );`,
+            (err, result) => {
                 if (err) {
                     console.log(`Error in creating new user: ${err}`);
                     res.status(403).send({
-                        verdict: 'Error in sign up'
+                        verdict: 'Error in sign up',
+                        success: false,
                     })
                     return;
                 }
+                result.success = true;
                 console.log(`Result from inserting data in db: ${result}`)
                 res.status(200).send(result);
                 return;
             })
             
         });
-    });
 }
 
 export { authorise, signIn, signUp }
