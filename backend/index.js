@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import connection from './database/config.js'
+import { signIn, signUp } from './authorisation/userAuth.js'
 
 const app = express()
 dotenv.config()
@@ -13,6 +14,10 @@ app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,');
     next();
 });
+
+app.get('/login', signIn)
+
+app.post('/signup', signUp)
 
 app.get('/', (req,res) => {
     connection.connect()
