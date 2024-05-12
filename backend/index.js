@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import connection from './database/config.js'
 
 const app = express()
 dotenv.config()
@@ -14,7 +15,9 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', (req,res) => {
+    connection.connect()
     res.status(200).send('Backend running successfully')
+    connection.end()
 })
 
 app.listen(process.env.PORT || 3000, (err) => {
