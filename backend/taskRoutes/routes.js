@@ -93,3 +93,21 @@ function deleteById(req, res) {
         });
     });
 }
+
+function markCompleteById(req, res) {
+    connection.query(
+        `UPDATE Tasks SET completed = '${req.body.completed}' WHERE id='${req.body.id}'`,
+        (err, result) => {
+        if (err){
+            res.status(403).send({
+                verdict: `Error updating task: ${err}`,
+                success: false,
+            });
+            return;
+        }
+        res.status(200).send({
+            verdict: result,
+            success: true,
+        });
+    });
+}
