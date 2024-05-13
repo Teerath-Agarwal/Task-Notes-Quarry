@@ -25,10 +25,28 @@ function putByUsr(req, res) {
         INSERT INTO Tasks (user, title, task, completed, deadline, priority)
         VALUES (
             '${user}', '${title}', '${task}', '${completed}', '${deadline}', '${priority}');`, 
-        (err, result) => {
+            (err, result) => {
         if (err){
             res.status(403).send({
                 verdict: `Error creating new task: ${err}`,
+                success: false,
+            });
+            return;
+        }
+        res.status(200).send({
+            verdict: result,
+            success: true,
+        });
+    });
+}
+
+function deleteById(req, res) {
+    connection.query(
+        `DELETE FROM Tasks WHERE id='${req.body.id}'`,
+        (err, result) => {
+        if (err){
+            res.status(403).send({
+                verdict: `Error deleting task: ${err}`,
                 success: false,
             });
             return;
