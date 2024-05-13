@@ -25,7 +25,7 @@ function putByUsr(req, res) {
         INSERT INTO Tasks (user, title, task, completed, deadline, priority)
         VALUES (
             '${user}', '${title}', '${task}', '${completed}', '${deadline}', '${priority}');`, 
-            (err, result) => {
+        (err, result) => {
         if (err){
             res.status(403).send({
                 verdict: `Error creating new task: ${err}`,
@@ -38,6 +38,42 @@ function putByUsr(req, res) {
             success: true,
         });
     });
+}
+
+function updtById(req, res) {
+    connection.query(
+        `SELECT * FROM Tasks WHERE id='${req.body.id}'`,
+        (err, result) => {
+        if (err){
+            res.status(403).send({
+                verdict: `Error fetching task: ${err}`,
+                success: false,
+            });
+            return;
+        }
+        var task = result[0];
+        Object.keys(req.body).forEach(key => {
+            task.key = req.body.key;
+        })
+        connection.query(
+            `UPDATE Tasks SET
+            title = '${task.title}', task = '${task.task}', completed = '${task.completed}', deadline = '${task.deadline}', priority = '${task.priority}'
+            WHERE id='${task.id}'`,
+            (err, result) => {
+            if (err){
+                res.status(403).send({
+                    verdict: `Error updating task: ${err}`,
+                    success: false,
+                });
+                return;
+            }
+            res.status(200).send({
+                verdict: result,
+                success: true,
+            });
+        });
+    });
+
 }
 
 function deleteById(req, res) {
