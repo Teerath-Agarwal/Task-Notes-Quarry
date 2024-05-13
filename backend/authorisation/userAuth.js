@@ -9,7 +9,10 @@ function authorise(req, res, next) {
     const token = req.cookies.token;
     try {
         const user = jwt.verify(token, process.env.JTW_PRIVATE_KEY);
-        req.userid = user.id;
+        if (req.body.user)
+            assert(user.id == req.body.user)
+        else
+            req.body.user = user.id;
         next();
     }
     catch (err) {
