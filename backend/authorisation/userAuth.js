@@ -88,7 +88,6 @@ function signUp(req, res) {
                     return;
                 }
                 result.success = true;
-                console.log(`Result from inserting data in db: ${result}`)
                 res.status(200).send(result);
                 return;
             })
@@ -96,4 +95,17 @@ function signUp(req, res) {
         });
 }
 
-export { authorise, signIn, signUp }
+function signOut(req, res) {
+    try {
+        res.clearCookie('token');
+        res.status(200).send({success: true});
+    }
+    catch (err) {
+        res.status(403).send({
+            verdict: err,
+            success: false
+        })
+    }
+}
+
+export { authorise, signIn, signUp, signOut }

@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 // import connection from './database/config.js'
-import { signIn, signUp } from './authorisation/userAuth.js'
+import { signIn, signOut, signUp, authorise } from './authorisation/userAuth.js'
 
 const app = express()
 dotenv.config()
@@ -17,9 +17,11 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.get('/login', signIn)
+app.post('/login', signIn)
 
-app.post('/signup', signUp)
+app.put('/signup', signUp)
+
+app.delete('/logout', signOut)
 
 app.get('/', (req,res) => {
     res.status(200).send('Backend running successfully')
