@@ -111,3 +111,5 @@ function markCompleteById(req, res) {
         });
     });
 }
+
+export { getByUsr, putByUsr, updtById, deleteById, markCompleteById}

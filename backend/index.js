@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 // import connection from './database/config.js'
 import { signIn, signOut, signUp, authorise } from './authorisation/userAuth.js'
+import { deleteById, getByUsr, markCompleteById, putByUsr, updtById } from './taskRoutes/routes.js'
 
 const app = express()
 dotenv.config()
@@ -16,6 +17,17 @@ app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,');
     next();
 });
+
+app.route('/welcome')
+    .get(getByUsr)
+    .put(putByUsr)
+
+app.route('/taskID')
+    .post(updtById)
+    .delete(deleteById)
+
+app.route('/taskComplete')
+    .post(markCompleteById)
 
 app.post('/login', signIn)
 
