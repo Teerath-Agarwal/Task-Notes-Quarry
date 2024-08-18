@@ -6,11 +6,18 @@ import connection from '../database/config.js'
 dotenv.config();
 
 function authorise(req, res, next) {
-    const token = req.cookies.token;
     try {
-        const user = jwt.verify(token, process.env.JTW_PRIVATE_KEY);
-        if (req.body.user)
-            assert(user.id == req.body.user)
+        const { token } = req.cookies;
+        if (token == undefined)
+            throw 'User not signed in!'
+        const user = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+        if (req.body.user && (user.id != req.body.user)){
+            res.status(403).send({
+                verdict: 'Access denied. Unauthorized request.',
+                success: false,
+            });
+            return;
+        }
         else
             req.body.user = user.id;
         next();
@@ -18,7 +25,10 @@ function authorise(req, res, next) {
     catch (err) {
         console.log(`Authorisation Error: ${err}`);
         res.clearCookie('token');
-        res.send(err);
+        res.status(500).send({
+            verdict: `Authorisation Error: ${err}`,
+            success: false,
+        });
     }
 }
 
@@ -51,7 +61,6 @@ function signIn(req, res){
                 const token = jwt.sign({id, email}, process.env.JWT_PRIVATE_KEY, { expiresIn: "1h"});
                 res.cookie("token", token, {
                     httpOnly: true,
-                    secure: true
                 });
                 res.status(200).send({
                     verdict: 'Sign in successful',
@@ -104,8 +113,9 @@ function signOut(req, res) {
         res.status(200).send({success: true});
     }
     catch (err) {
+        console.log(`Error in Sign Out: ${err}`);
         res.status(403).send({
-            verdict: err,
+            verdict: 'Error in signing out',
             success: false
         })
     }
