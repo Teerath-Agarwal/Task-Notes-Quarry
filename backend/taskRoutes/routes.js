@@ -19,8 +19,7 @@ function getByUsr(req, res) {
 }
 
 function putByUsr(req, res) {
-    const { user, title = "", task, completed = false, deadline = "1970-01-01", priority = 0  }  = req.body;
-
+    const { user, title = "", task, completed = 0, deadline = "1970-01-01", priority = 0  }  = req.body;
     connection.query(`
         INSERT INTO Tasks (user, title, task, completed, deadline, priority)
         VALUES (
@@ -52,6 +51,13 @@ function updtById(req, res) {
             return;
         }
         var task = result[0];
+        if (task.user != req.body.user){
+            res.status(403).send({
+                verdict: 'Access denied. Unauthorized request.',
+                success: false,
+            });
+            return;
+        }
         Object.keys(req.body).forEach(key => {
             task.key = req.body.key;
         })
@@ -78,23 +84,41 @@ function updtById(req, res) {
 
 function deleteById(req, res) {
     connection.query(
-        `DELETE FROM Tasks WHERE id='${req.body.id}'`,
+        `SELECT user FROM Tasks WHERE id='${req.body.id}'`,
         (err, result) => {
         if (err){
             res.status(403).send({
-                verdict: `Error deleting task: ${err}`,
+                verdict: `Error fetching task: ${err}`,
                 success: false,
             });
             return;
         }
-        res.status(200).send({
-            verdict: result,
-            success: true,
+        if (result[0].user != req.body.user){
+            res.status(403).send({
+                verdict: 'Access denied. Unauthorized request.',
+                success: false,
+            });
+            return;
+        }
+        connection.query(
+            `DELETE FROM Tasks WHERE id='${req.body.id}'`,
+            (err, result) => {
+            if (err){
+                res.status(403).send({
+                    verdict: `Error deleting task: ${err}`,
+                    success: false,
+                });
+                return;
+            }
+            res.status(200).send({
+                verdict: result,
+                success: true,
+            });
         });
     });
 }
 
-function markCompleteById(req, res) {
+function markComplete(req, res) {
     connection.query(
         `UPDATE Tasks SET completed = '${req.body.completed}' WHERE id='${req.body.id}'`,
         (err, result) => {
@@ -112,4 +136,4 @@ function markCompleteById(req, res) {
     });
 }
 
-export { getByUsr, putByUsr, updtById, deleteById, markCompleteById}
+export { getByUsr, putByUsr, updtById, deleteById, markComplete}

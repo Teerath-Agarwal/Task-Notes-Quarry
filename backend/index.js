@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv'
 // import connection from './database/config.js'
 import { signIn, signOut, signUp, authorise } from './authorisation/userAuth.js'
-import { deleteById, getByUsr, markCompleteById, putByUsr, updtById } from './taskRoutes/routes.js'
+import { deleteById, getByUsr, markComplete, putByUsr, updtById } from './taskRoutes/routes.js'
 
 const app = express()
 dotenv.config()
@@ -29,7 +29,7 @@ app.route('/task/:id')
     .delete(authorise, deleteById)
 
 app.route('/task/:id/complete')
-    .post(authorise, markCompleteById)
+    .post(authorise, markComplete)
 
 app.post('/login', signIn)
 
