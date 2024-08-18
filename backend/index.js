@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv'
-// import connection from './database/config.js'
 import { signIn, signOut, signUp, authorise } from './authorisation/userAuth.js'
 import { deleteById, getByUsr, putByUsr, updtById } from './taskRoutes/routes.js'
 
@@ -16,7 +15,7 @@ app.use(cookieParser());
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
     next();
 });
 
@@ -34,7 +33,7 @@ app.put('/signup', signUp)
 
 app.delete('/logout', signOut)
 
-app.get('/', (req,res) => {
+app.get('/', (req, res) => {
     res.status(200).send('Backend running successfully')
 })
 

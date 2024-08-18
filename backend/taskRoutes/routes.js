@@ -76,15 +76,8 @@ function updtById(req, res) {
         });
 
         query_params = query_params.slice(0, -2);
-
-        // Object.keys(req.body).forEach(key => {
-        //     task.key = req.body.key;
-        // })
         connection.query(
             `UPDATE Tasks SET ${query_params} WHERE id='${taskId}'`,
-            // `UPDATE Tasks SET
-            // title = '${task.title}', task = '${task.task}', completed = '${task.completed}', deadline = '${task.deadline}', priority = '${task.priority}'
-            // WHERE id='${task.id}'`,
             (err, result) => {
             if (err){
                 res.status(403).send({
