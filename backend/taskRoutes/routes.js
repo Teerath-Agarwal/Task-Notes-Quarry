@@ -40,8 +40,9 @@ function putByUsr(req, res) {
 }
 
 function updtById(req, res) {
+    const taskId = parseInt(req.params.id);
     connection.query(
-        `SELECT * FROM Tasks WHERE id='${req.body.id}'`,
+        `SELECT user FROM Tasks WHERE id='${taskId}'`,
         (err, result) => {
         if (err){
             res.status(403).send({
@@ -50,21 +51,40 @@ function updtById(req, res) {
             });
             return;
         }
-        var task = result[0];
-        if (task.user != req.body.user){
+        if (result.length == 0) {
+            res.status(500).send({
+                verdict: `Error: Task with ID - ${taskId} does not exist`,
+                success: false,
+            });
+            return;
+        }
+        if (result[0].user != req.body.user){
             res.status(403).send({
                 verdict: 'Access denied. Unauthorized request.',
                 success: false,
             });
             return;
         }
-        Object.keys(req.body).forEach(key => {
-            task.key = req.body.key;
-        })
+
+        let query_params = '';
+        let keys = ['title', 'task', 'completed', 'deadline', 'priority'];
+
+        keys.forEach(key => {
+            if (req.body[key] !== undefined) {
+                query_params += `${key} = '${req.body[key]}', `;
+            }
+        });
+
+        query_params = query_params.slice(0, -2);
+
+        // Object.keys(req.body).forEach(key => {
+        //     task.key = req.body.key;
+        // })
         connection.query(
-            `UPDATE Tasks SET
-            title = '${task.title}', task = '${task.task}', completed = '${task.completed}', deadline = '${task.deadline}', priority = '${task.priority}'
-            WHERE id='${task.id}'`,
+            `UPDATE Tasks SET ${query_params} WHERE id='${taskId}'`,
+            // `UPDATE Tasks SET
+            // title = '${task.title}', task = '${task.task}', completed = '${task.completed}', deadline = '${task.deadline}', priority = '${task.priority}'
+            // WHERE id='${task.id}'`,
             (err, result) => {
             if (err){
                 res.status(403).send({
@@ -83,12 +103,20 @@ function updtById(req, res) {
 }
 
 function deleteById(req, res) {
+    const taskId = parseInt(req.params.id);
     connection.query(
-        `SELECT user FROM Tasks WHERE id='${req.body.id}'`,
+        `SELECT user FROM Tasks WHERE id='${taskId}'`,
         (err, result) => {
         if (err){
             res.status(403).send({
                 verdict: `Error fetching task: ${err}`,
+                success: false,
+            });
+            return;
+        }
+        if (result.length == 0) {
+            res.status(500).send({
+                verdict: `Error: Task with ID - ${taskId} does not exist`,
                 success: false,
             });
             return;
@@ -101,7 +129,7 @@ function deleteById(req, res) {
             return;
         }
         connection.query(
-            `DELETE FROM Tasks WHERE id='${req.body.id}'`,
+            `DELETE FROM Tasks WHERE id='${taskId}'`,
             (err, result) => {
             if (err){
                 res.status(403).send({
